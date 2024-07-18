@@ -115,10 +115,10 @@ app.get('/clientes', async (req, res) => {
     }
 });
 
-app.get('/clientes/:codigo_cliente', async (req, res) => {
-    const { codigo_cliente } = req.params;
+app.get('/clientes/:cedula', async (req, res) => {
+    const { cedula } = req.params;
     try {
-        const [rows] = await db.query('SELECT * FROM Cliente WHERE codigo_cliente = ?', [codigo_cliente]);
+        const [rows] = await db.query('SELECT * FROM Cliente WHERE codigo_cliente = ?', [cedula]);
         if (rows.length === 0) {
             res.status(404).json({ error: 'Cliente no encontrado' });
         } else {
