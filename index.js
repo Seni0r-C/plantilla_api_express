@@ -1,11 +1,11 @@
 const express = require('express');
-// const mysql = require('mysql2');
+const mysql = require('mysql2');
 const db = require('./db');
+const swaggerJsdoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
 
 const app = express();
 const port = 3000;
-
-app.use(bodyParser.json());
 
 db.connect((err) => {
     if (err) throw err;
@@ -13,6 +13,27 @@ db.connect((err) => {
 });
 
 app.use(express.json());
+
+const swaggerOptions = {
+    swaggerDefinition: {
+        openapi: '3.0.0',
+        info: {
+            title: 'API del Concesionario',
+            version: '1.0.0',
+            description: 'Documentación de la API del Complexivo',
+        },
+        servers: [
+            {
+                url: 'http://localhost:3000',
+                description: 'Servidor de desarrollo',
+            },
+        ],
+    },
+    apis: ['./docs.js'], // Aquí pones la ruta a tus archivos con la documentación
+};
+
+const swaggerDocs = swaggerJsdoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Endpoints para la tabla Coche
 app.post('/coches', async (req, res) => {
@@ -285,7 +306,7 @@ app.delete('/revisiones/:codigo_revision', async (req, res) => {
     }
 });
 
-
 app.listen(port, () => {
-    console.log('Server running on port 3000');
+    console.log(`Servidor escuchando en http://localhost:${port}`);
+    console.log(`Documentación disponible en http://localhost:${port}/api-docs`);
 });
