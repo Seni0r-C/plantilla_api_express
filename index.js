@@ -38,13 +38,35 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 // Endpoints para la tabla Coche
 app.post('/coches', async (req, res) => {
     const { matricula, marca, modelo, color, precio_venta } = req.body;
+
+    // Verificar que ningún campo esté vacío
+    if (!matricula || !marca || !modelo || !color || precio_venta === undefined) {
+        return res.status(400).json({ error: 'Todos los campos son obligatorios.' });
+    }
+
+    // Verificar que el precio no sea negativo
+    if (precio_venta < 0) {
+        return res.status(400).json({ error: 'El precio no puede ser negativo.' });
+    }
+
     try {
-        const [result] = await db.query('INSERT INTO Coche (matricula, marca, modelo, color, precio_venta) VALUES (?, ?, ?, ?, ?)', [matricula, marca, modelo, color, precio_venta]);
-        res.status(201).json({ id: result.insertId });
+        // Verificar si la matrícula ya existe
+        const [existingCar] = await db.query('SELECT * FROM Coche WHERE matricula = ?', [matricula]);
+
+        if (existingCar.length > 0) {
+            // Si la matrícula ya existe, actualizar los datos
+            await db.query('UPDATE Coche SET marca = ?, modelo = ?, color = ?, precio_venta = ? WHERE matricula = ?', [marca, modelo, color, precio_venta, matricula]);
+            res.status(200).json({ message: 'Coche actualizado correctamente.' });
+        } else {
+            // Si la matrícula no existe, insertar un nuevo coche
+            const [result] = await db.query('INSERT INTO Coche (matricula, marca, modelo, color, precio_venta) VALUES (?, ?, ?, ?, ?)', [matricula, marca, modelo, color, precio_venta]);
+            res.status(201).json({ id: result.insertId });
+        }
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
+
 
 app.get('/coches', async (req, res) => {
     try {
