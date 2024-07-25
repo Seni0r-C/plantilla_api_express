@@ -3,6 +3,7 @@ const mysql = require('mysql2');
 const db = require('./db');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
+const cors = require('cors');
 
 const app = express();
 const port = 3000;
@@ -12,8 +13,8 @@ db.connect((err) => {
     console.log('Connected to database');
 });
 
+app.use(cors());
 app.use(express.json());
-
 const swaggerOptions = {
     swaggerDefinition: {
         openapi: '3.0.0',
