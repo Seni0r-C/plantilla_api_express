@@ -77,25 +77,6 @@ app.get('/coches', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
-// Endpoints para la tabla Coche
-app.post('/coches', async (req, res) => {
-    const { matricula, marca, modelo, color, precio_venta } = req.body;
-    try {
-        const [result] = await db.query('INSERT INTO Coche (matricula, marca, modelo, color, precio_venta) VALUES (?, ?, ?, ?, ?)', [matricula, marca, modelo, color, precio_venta]);
-        res.status(201).json({ id: result.insertId });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-app.get('/coches', async (req, res) => {
-    try {
-        const [rows] = await db.query('SELECT * FROM Coche');
-        res.status(200).json(rows);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
 
 app.get('/coches/:matricula', async (req, res) => {
     const { matricula } = req.params;
