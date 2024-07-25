@@ -120,26 +120,45 @@ app.delete('/coches/:matricula', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+
+
 app.post('/clientes', async (req, res) => {
-    const { numero_cedula, nombres, apellidos, direccion, ciudad, numero_telefono } = req.body;
+    const { numero_cedula, nombres, apellidos, direccion, ciudad, numero_telefono, matricula, fecha_compra } = req.body;
 
     try {
+        let client;
+        let clientId;
+
         // Verifica si la cédula ya existe
-        const [existingClient] = await db.query('SELECT numero_cedula FROM Cliente WHERE numero_cedula = ?', [numero_cedula]);
+        const [existingClient] = await db.query('SELECT codigo_cliente FROM cliente WHERE numero_cedula = ?', [numero_cedula]);
 
-        if (existingClient.length > 0) {
-            // Si ya existe, envía un error
-            return res.status(400).json({ error: 'El número de cédula ya está registrado.' });
+        if (existingClient.length === 0) {
+            // Si el cliente no existe, lo inserta
+            const [insertResult] = await db.query('INSERT INTO cliente (numero_cedula, nombres, apellidos, direccion, ciudad, numero_telefono) VALUES (?, ?, ?, ?, ?, ?)', [numero_cedula, nombres, apellidos, direccion, ciudad, numero_telefono]);
+
+            clientId = insertResult.insertId;
+        } else {
+            // Si el cliente existe, obtiene su ID
+            clientId = existingClient[0].codigo_cliente;
         }
+        //un cosa solo puede ser comprado por un solo cliente
+        const [existingCar] = await db.query('SELECT * FROM compra WHERE matricula = ?', [matricula]);
 
-        // Si no existe, procede con la inserción
-        const [result] = await db.query('INSERT INTO Cliente (numero_cedula, nombres, apellidos, direccion, ciudad, numero_telefono) VALUES (?, ?, ?, ?, ?, ?)', [numero_cedula, nombres, apellidos, direccion, ciudad, numero_telefono]);
+        if (existingCar.length > 0) {
+            // Si ya existe una compra con el mismo cliente, devuelve error
+            res.status(400).json({ error: 'Ya existe una compra De este Vehículo' });
+            return;
+        }
+        // Inserta en la tabla Compra usando el ID del cliente
+        const [insertCompraResult] = await db.query('INSERT INTO compra (matricula, codigo_cliente, fecha_compra) VALUES (?, ?, ?)', [matricula, clientId, fecha_compra]);
 
-        res.status(201).json({ id: result.insertId });
+        res.status(201).json({ id2: insertCompraResult.insertId });
+
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
+
 
 
 app.get('/clientes', async (req, res) => {
