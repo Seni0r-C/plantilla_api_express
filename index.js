@@ -71,7 +71,12 @@ app.post('/coches', async (req, res) => {
 
 app.get('/coches', async (req, res) => {
     try {
-        const [rows] = await db.query('SELECT * FROM Coche');
+        const [rows] = await db.query(`
+        SELECT * FROM Coche
+        WHERE matricula NOT IN (
+            SELECT matricula FROM Compra
+        )
+    `);
         res.status(200).json(rows);
     } catch (err) {
         res.status(500).json({ error: err.message });
