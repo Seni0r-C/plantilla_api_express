@@ -120,16 +120,27 @@ app.delete('/coches/:matricula', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
-
 app.post('/clientes', async (req, res) => {
     const { numero_cedula, nombres, apellidos, direccion, ciudad, numero_telefono } = req.body;
+
     try {
+        // Verifica si la cédula ya existe
+        const [existingClient] = await db.query('SELECT numero_cedula FROM Cliente WHERE numero_cedula = ?', [numero_cedula]);
+
+        if (existingClient.length > 0) {
+            // Si ya existe, envía un error
+            return res.status(400).json({ error: 'El número de cédula ya está registrado.' });
+        }
+
+        // Si no existe, procede con la inserción
         const [result] = await db.query('INSERT INTO Cliente (numero_cedula, nombres, apellidos, direccion, ciudad, numero_telefono) VALUES (?, ?, ?, ?, ?, ?)', [numero_cedula, nombres, apellidos, direccion, ciudad, numero_telefono]);
+
         res.status(201).json({ id: result.insertId });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
+
 
 app.get('/clientes', async (req, res) => {
     try {
