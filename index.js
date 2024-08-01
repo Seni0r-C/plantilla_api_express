@@ -140,7 +140,7 @@ app.post('/clientes', async (req, res) => {
     }
 });
 
-app.get('/clientes', (req, res) => {
+app.get('/clientes', async (req, res) => {
     const query = `
       SELECT 
         c.codigo_cliente, 
@@ -157,16 +157,13 @@ app.get('/clientes', (req, res) => {
       LEFT JOIN coche v ON cp.matricula = v.matricula
       GROUP BY c.codigo_cliente, c.numero_cedula, c.nombres, c.apellidos, c.direccion, c.ciudad, c.numero_telefono
     `;
-
-    db.query(query, (err, results) => {
-        if (err) {
-            console.error('Error ejecutando la consulta:', err);
-            res.status(500).send('Error en el servidor');
-            return;
-        }
-
+    try {
+        const [results] = await db.query(query);
         res.json(results);
-    });
+
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 app.post('/revisiones', async (req, res) => {
@@ -179,7 +176,7 @@ app.post('/revisiones', async (req, res) => {
     }
 });
 
-app.get('/mantenimientos/:matricula', (req, res) => {
+app.get('/mantenimientos/:matricula', async (req, res) => {
     const { matricula } = req.params;
 
     const query = `
@@ -196,16 +193,13 @@ app.get('/mantenimientos/:matricula', (req, res) => {
       WHERE r.matricula = ?
       ORDER BY r.fecha_hora_recepcion DESC
     `;
-
-    db.query(query, [matricula], (err, results) => {
-        if (err) {
-            console.error('Error ejecutando la consulta:', err);
-            res.status(500).send('Error en el servidor');
-            return;
-        }
-
+    try {
+        const [results] = await db.query(query, [matricula]);
         res.json(results);
-    });
+
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 app.listen(port, () => {
