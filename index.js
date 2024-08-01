@@ -68,7 +68,6 @@ app.post('/coches', async (req, res) => {
     }
 });
 
-
 app.get('/coches', async (req, res) => {
     try {
         const [rows] = await db.query(`
@@ -83,20 +82,26 @@ app.get('/coches', async (req, res) => {
     }
 });
 
-app.get('/coches/:matricula', async (req, res) => {
-    const { matricula } = req.params;
+app.get('/cochescomprados/:numero_cedula', async (req, res) => {
+    const { numero_cedula } = req.params;
+
+    const query = `
+      SELECT coche.matricula, coche.marca, coche.modelo, coche.color
+      FROM cliente
+      JOIN compra ON cliente.codigo_cliente = compra.codigo_cliente
+      JOIN coche ON compra.matricula = coche.matricula
+      WHERE cliente.numero_cedula = ?`;
     try {
-        const [rows] = await db.query('SELECT * FROM Coche WHERE matricula = ?', [matricula]);
-        if (rows.length === 0) {
-            res.status(404).json({ error: 'Coche no encontrado' });
+        const [rows] = await db.query(query, [numero_cedula]);
+        if (rows) {
+            res.status(200).json(rows);
         } else {
-            res.status(200).json(rows[0]);
+            res.status(404).json({ error: 'El Cliente no Tiene Vehículos' });
         }
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
-
 
 app.post('/clientes', async (req, res) => {
     const { numero_cedula, nombres, apellidos, direccion, ciudad, numero_telefono, matricula, fecha_compra } = req.body;
@@ -135,53 +140,6 @@ app.post('/clientes', async (req, res) => {
     }
 });
 
-
-app.get('/clientes', async (req, res) => {
-    try {
-        const [rows] = await db.query('SELECT * FROM Cliente');
-        res.status(200).json(rows);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-app.get('/clientes/:cedula', async (req, res) => {
-    const { cedula } = req.params;
-    try {
-        const [rows] = await db.query('SELECT * FROM Cliente WHERE codigo_cliente = ?', [cedula]);
-        if (rows.length === 0) {
-            res.status(404).json({ error: 'Cliente no encontrado' });
-        } else {
-            res.status(200).json(rows[0]);
-        }
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-app.get('/cochescomprados/:numero_cedula', async (req, res) => {
-    const { numero_cedula } = req.params;
-
-    const query = `
-      SELECT coche.matricula, coche.marca, coche.modelo, coche.color
-      FROM cliente
-      JOIN compra ON cliente.codigo_cliente = compra.codigo_cliente
-      JOIN coche ON compra.matricula = coche.matricula
-      WHERE cliente.numero_cedula = ?`;
-    try {
-        const [rows] = await db.query(query, [numero_cedula]);
-        if (rows) {
-            res.status(200).json(rows);
-        } else {
-            res.status(404).json({ error: 'El Cliente no Tiene Vehículos' });
-        }
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-
-// Endpoints para la tabla Revision
 app.post('/revisiones', async (req, res) => {
     const { matricula, cambio_filtro, cambio_aceite, cambio_frenos, costo_revision, fecha_hora_recepcion, fecha_hora_entrega } = req.body;
     try {
@@ -192,57 +150,7 @@ app.post('/revisiones', async (req, res) => {
     }
 });
 
-app.get('/revisiones', async (req, res) => {
-    try {
-        const [rows] = await db.query('SELECT * FROM Revision');
-        res.status(200).json(rows);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
 
-app.get('/revisiones/:codigo_revision', async (req, res) => {
-    const { codigo_revision } = req.params;
-    try {
-        const [rows] = await db.query('SELECT * FROM Revision WHERE codigo_revision = ?', [codigo_revision]);
-        if (rows.length === 0) {
-            res.status(404).json({ error: 'Revision no encontrada' });
-        } else {
-            res.status(200).json(rows[0]);
-        }
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-app.put('/revisiones/:codigo_revision', async (req, res) => {
-    const { codigo_revision } = req.params;
-    const { matricula, cambio_filtro, cambio_aceite, cambio_frenos, costo_revision, fecha_hora_recepcion, fecha_hora_entrega } = req.body;
-    try {
-        const [result] = await db.query('UPDATE Revision SET matricula = ?, cambio_filtro = ?, cambio_aceite = ?, cambio_frenos = ?, costo_revision = ?, fecha_hora_recepcion = ?, fecha_hora_entrega = ? WHERE codigo_revision = ?', [matricula, cambio_filtro, cambio_aceite, cambio_frenos, costo_revision, fecha_hora_recepcion, fecha_hora_entrega, codigo_revision]);
-        if (result.affectedRows === 0) {
-            res.status(404).json({ error: 'Revision no encontrada' });
-        } else {
-            res.status(200).json({ message: 'Revision actualizada' });
-        }
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-app.delete('/revisiones/:codigo_revision', async (req, res) => {
-    const { codigo_revision } = req.params;
-    try {
-        const [result] = await db.query('DELETE FROM Revision WHERE codigo_revision = ?', [codigo_revision]);
-        if (result.affectedRows === 0) {
-            res.status(404).json({ error: 'Revision no encontrada' });
-        } else {
-            res.status(200).json({ message: 'Revision eliminada' });
-        }
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
 
 app.listen(port, () => {
     console.log(`Servidor escuchando en http://localhost:${port}`);
