@@ -1,15 +1,13 @@
 /**
  * @swagger
- * tags:
- *   name: Coches
- *   description: Operaciones sobre coches
+ *  Tags: [Coches]
  */
 
 /**
  * @swagger
  * /coches:
  *   post:
- *     summary: Añadir un nuevo coche
+ *     summary: Crear o actualizar un coche
  *     tags: [Coches]
  *     requestBody:
  *       required: true
@@ -28,116 +26,67 @@
  *                 type: string
  *               precio_venta:
  *                 type: number
+ *             required:
+ *               - matricula
+ *               - marca
+ *               - modelo
+ *               - color
+ *               - precio_venta
  *     responses:
+ *       200:
+ *         description: Coche actualizado correctamente.
  *       201:
- *         description: Coche creado exitosamente
+ *         description: Coche creado correctamente.
+ *       400:
+ *         description: Todos los campos son obligatorios o el precio no puede ser negativo.
  *       500:
- *         description: Error en el servidor
+ *         description: Error interno del servidor.
  */
 
 /**
  * @swagger
  * /coches:
  *   get:
- *     summary: Obtener todos los coches
+ *     summary: Obtener la lista de coches disponibles
  *     tags: [Coches]
  *     responses:
  *       200:
- *         description: Lista de coches
+ *         description: Lista de coches disponibles.
  *       500:
- *         description: Error en el servidor
+ *         description: Error interno del servidor.
  */
 
 /**
  * @swagger
- * /coches/{matricula}:
+ * /cochescomprados/{numero_cedula}:
  *   get:
- *     summary: Obtener un coche por matrícula
+ *     summary: Obtener la lista de coches comprados por un cliente
  *     tags: [Coches]
  *     parameters:
- *       - name: matricula
- *         in: path
+ *       - in: path
+ *         name: numero_cedula
  *         required: true
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: Detalles del coche
+ *         description: Lista de coches comprados por el cliente.
  *       404:
- *         description: Coche no encontrado
+ *         description: El cliente no tiene vehículos.
  *       500:
- *         description: Error en el servidor
+ *         description: Error interno del servidor.
  */
 
 /**
  * @swagger
- * /coches/{matricula}:
- *   put:
- *     summary: Actualizar un coche por matrícula
- *     tags: [Coches]
- *     parameters:
- *       - name: matricula
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               marca:
- *                 type: string
- *               modelo:
- *                 type: string
- *               color:
- *                 type: string
- *               precio_venta:
- *                 type: number
- *     responses:
- *       200:
- *         description: Coche actualizado
- *       404:
- *         description: Coche no encontrado
- *       500:
- *         description: Error en el servidor
- */
-
-/**
- * @swagger
- * /coches/{matricula}:
- *   delete:
- *     summary: Eliminar un coche por matrícula
- *     tags: [Coches]
- *     parameters:
- *       - name: matricula
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Coche eliminado
- *       404:
- *         description: Coche no encontrado
- *       500:
- *         description: Error en el servidor
- */
-
-/**
- * @swagger
- * tags:
- *   name: Clientes
- *   description: Operaciones sobre clientes
+ *  Tags: [Clientes]
  */
 
 /**
  * @swagger
  * /clientes:
  *   post:
- *     summary: Añadir un nuevo cliente
+ *     summary: Crear un cliente y registrar una compra
  *     tags: [Clientes]
  *     requestBody:
  *       required: true
@@ -158,244 +107,51 @@
  *                 type: string
  *               numero_telefono:
  *                 type: string
+ *               matricula:
+ *                 type: string
+ *               fecha_compra:
+ *                 type: string
+ *             required:
+ *               - numero_cedula
+ *               - nombres
+ *               - apellidos
+ *               - direccion
+ *               - ciudad
+ *               - numero_telefono
+ *               - matricula
+ *               - fecha_compra
  *     responses:
  *       201:
- *         description: Cliente creado exitosamente
+ *         description: Cliente y compra creados correctamente.
+ *       400:
+ *         description: Ya existe una compra de este vehículo.
  *       500:
- *         description: Error en el servidor
+ *         description: Error interno del servidor.
  */
 
 /**
  * @swagger
  * /clientes:
  *   get:
- *     summary: Obtener todos los clientes
+ *     summary: Obtener la lista de clientes y sus vehículos
  *     tags: [Clientes]
  *     responses:
  *       200:
- *         description: Lista de clientes
+ *         description: Lista de clientes y sus vehículos.
  *       500:
- *         description: Error en el servidor
+ *         description: Error interno del servidor.
  */
 
 /**
  * @swagger
- * /clientes/{cedula}:
- *   get:
- *     summary: Obtener un cliente por cédula
- *     tags: [Clientes]
- *     parameters:
- *       - name: cedula
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Detalles del cliente
- *       404:
- *         description: Cliente no encontrado
- *       500:
- *         description: Error en el servidor
- */
-
-/**
- * @swagger
- * /clientes/{codigo_cliente}:
- *   put:
- *     summary: Actualizar un cliente por código
- *     tags: [Clientes]
- *     parameters:
- *       - name: codigo_cliente
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               numero_cedula:
- *                 type: string
- *               nombres:
- *                 type: string
- *               apellidos:
- *                 type: string
- *               direccion:
- *                 type: string
- *               ciudad:
- *                 type: string
- *               numero_telefono:
- *                 type: string
- *     responses:
- *       200:
- *         description: Cliente actualizado
- *       404:
- *         description: Cliente no encontrado
- *       500:
- *         description: Error en el servidor
- */
-
-/**
- * @swagger
- * /clientes/{codigo_cliente}:
- *   delete:
- *     summary: Eliminar un cliente por código
- *     tags: [Clientes]
- *     parameters:
- *       - name: codigo_cliente
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Cliente eliminado
- *       404:
- *         description: Cliente no encontrado
- *       500:
- *         description: Error en el servidor
- */
-
-/**
- * @swagger
- * tags:
- *   name: Compras
- *   description: Operaciones sobre compras
- */
-
-/**
- * @swagger
- * /compras:
- *   post:
- *     summary: Añadir una nueva compra
- *     tags: [Compras]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               matricula:
- *                 type: string
- *               codigo_cliente:
- *                 type: string
- *               fecha_compra:
- *                 type: string
- *                 format: date
- *     responses:
- *       201:
- *         description: Compra creada exitosamente
- *       500:
- *         description: Error en el servidor
- */
-
-/**
- * @swagger
- * /compras:
- *   get:
- *     summary: Obtener todas las compras
- *     tags: [Compras]
- *     responses:
- *       200:
- *         description: Lista de compras
- *       500:
- *         description: Error en el servidor
- */
-
-/**
- * @swagger
- * /compras/{codigo_compra}:
- *   get:
- *     summary: Obtener una compra por código
- *     tags: [Compras]
- *     parameters:
- *       - name: codigo_compra
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Detalles de la compra
- *       404:
- *         description: Compra no encontrada
- *       500:
- *         description: Error en el servidor
- */
-
-/**
- * @swagger
- * /compras/{codigo_compra}:
- *   put:
- *     summary: Actualizar una compra por código
- *     tags: [Compras]
- *     parameters:
- *       - name: codigo_compra
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               matricula:
- *                 type: string
- *               codigo_cliente:
- *                 type: string
- *               fecha_compra:
- *                 type: string
- *                 format: date
- *     responses:
- *       200:
- *         description: Compra actualizada
- *       404:
- *         description: Compra no encontrada
- *       500:
- *         description: Error en el servidor
- */
-
-/**
- * @swagger
- * /compras/{codigo_compra}:
- *   delete:
- *     summary: Eliminar una compra por código
- *     tags: [Compras]
- *     parameters:
- *       - name: codigo_compra
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Compra eliminada
- *       404:
- *         description: Compra no encontrada
- *       500:
- *         description: Error en el servidor
- */
-
-/**
- * @swagger
- * tags:
- *   name: Revisiones
- *   description: Operaciones sobre revisiones
+ *  Tags: [Revisiones]
  */
 
 /**
  * @swagger
  * /revisiones:
  *   post:
- *     summary: Añadir una nueva revisión
+ *     summary: Crear una revisión para un coche
  *     tags: [Revisiones]
  *     requestBody:
  *       required: true
@@ -410,62 +166,57 @@
  *                 type: boolean
  *               cambio_aceite:
  *                 type: boolean
- *               revision_frenos:
+ *               cambio_frenos:
  *                 type: boolean
- *               revision_suspension:
- *                 type: boolean
- *               revision_general:
- *                 type: boolean
+ *               costo_revision:
+ *                 type: number
+ *               fecha_hora_recepcion:
+ *                 type: string
+ *               fecha_hora_entrega:
+ *                 type: string
+ *             required:
+ *               - matricula
+ *               - cambio_filtro
+ *               - cambio_aceite
+ *               - cambio_frenos
+ *               - costo_revision
+ *               - fecha_hora_recepcion
+ *               - fecha_hora_entrega
  *     responses:
  *       201:
- *         description: Revisión creada exitosamente
+ *         description: Revisión creada correctamente.
  *       500:
- *         description: Error en el servidor
+ *         description: Error interno del servidor.
  */
 
 /**
  * @swagger
- * /revisiones:
+ * /mantenimientos/{matricula}:
  *   get:
- *     summary: Obtener todas las revisiones
- *     tags: [Revisiones]
- *     responses:
- *       200:
- *         description: Lista de revisiones
- *       500:
- *         description: Error en el servidor
- */
-
-/**
- * @swagger
- * /revisiones/{codigo_revision}:
- *   get:
- *     summary: Obtener una revisión por código
+ *     summary: Obtener la lista de mantenimientos para un coche
  *     tags: [Revisiones]
  *     parameters:
- *       - name: codigo_revision
- *         in: path
+ *       - in: path
+ *         name: matricula
  *         required: true
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: Detalles de la revisión
- *       404:
- *         description: Revisión no encontrada
+ *         description: Lista de mantenimientos para el coche.
  *       500:
- *         description: Error en el servidor
+ *         description: Error interno del servidor.
  */
 
 /**
  * @swagger
- * /revisiones/{codigo_revision}:
+ * /revision/baja/{matricula}:
  *   put:
- *     summary: Actualizar una revisión por código
+ *     summary: Dar de baja una revisión activa de un coche
  *     tags: [Revisiones]
  *     parameters:
- *       - name: codigo_revision
- *         in: path
+ *       - in: path
+ *         name: matricula
  *         required: true
  *         schema:
  *           type: string
@@ -476,44 +227,15 @@
  *           schema:
  *             type: object
  *             properties:
- *               matricula:
+ *               explicacion:
  *                 type: string
- *               cambio_filtro:
- *                 type: boolean
- *               cambio_aceite:
- *                 type: boolean
- *               revision_frenos:
- *                 type: boolean
- *               revision_suspension:
- *                 type: boolean
- *               revision_general:
- *                 type: boolean
+ *             required:
+ *               - explicacion
  *     responses:
  *       200:
- *         description: Revisión actualizada
+ *         description: Revisión dada de baja exitosamente.
  *       404:
- *         description: Revisión no encontrada
+ *         description: No se encontró ninguna revisión activa para la matrícula proporcionada.
  *       500:
- *         description: Error en el servidor
- */
-
-/**
- * @swagger
- * /revisiones/{codigo_revision}:
- *   delete:
- *     summary: Eliminar una revisión por código
- *     tags: [Revisiones]
- *     parameters:
- *       - name: codigo_revision
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Revisión eliminada
- *       404:
- *         description: Revisión no encontrada
- *       500:
- *         description: Error en el servidor
+ *         description: Error en el servidor.
  */

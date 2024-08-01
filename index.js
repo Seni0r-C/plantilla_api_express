@@ -202,6 +202,25 @@ app.get('/mantenimientos/:matricula', async (req, res) => {
     }
 });
 
+app.put('/revision/baja/:matricula', async (req, res) => {
+    const matricula = req.params.matricula;
+    const { explicacion } = req.body;
+    try {
+        const querySelect = 'SELECT * FROM revision WHERE matricula = ? AND estado = "activo"';
+        const [results] = await db.query(querySelect, [matricula]);
+        if (results.length === 0) {
+            return res.status(404).send('No se encontró ninguna revisión activa para la matrícula proporcionada');
+        }
+
+        const queryUpdate = 'UPDATE revision SET estado = "inactivo", explicacion_baja = ? WHERE matricula = ? AND estado = "activo"';
+        await db.query(queryUpdate, [explicacion, matricula]);
+        res.status(200).send('Revisión dada de baja exitosamente');
+    } catch (err) {
+        res.status(500).send('Error en el servidor');
+    }
+});
+
+
 app.listen(port, () => {
     console.log(`Servidor escuchando en http://localhost:${port}`);
     console.log(`Documentación disponible en http://localhost:${port}/api-docs`);
