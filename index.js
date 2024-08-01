@@ -140,6 +140,35 @@ app.post('/clientes', async (req, res) => {
     }
 });
 
+app.get('/clientes', (req, res) => {
+    const query = `
+      SELECT 
+        c.codigo_cliente, 
+        c.numero_cedula, 
+        c.nombres, 
+        c.apellidos, 
+        c.direccion, 
+        c.ciudad, 
+        c.numero_telefono,
+        GROUP_CONCAT(CONCAT(v.marca, ' ', v.modelo, ' (', v.matricula, ')') SEPARATOR ', ') AS vehiculos,
+        COUNT(v.matricula) AS total_vehiculos
+      FROM cliente c
+      LEFT JOIN compra cp ON c.codigo_cliente = cp.codigo_cliente
+      LEFT JOIN coche v ON cp.matricula = v.matricula
+      GROUP BY c.codigo_cliente, c.numero_cedula, c.nombres, c.apellidos, c.direccion, c.ciudad, c.numero_telefono
+    `;
+
+    db.query(query, (err, results) => {
+        if (err) {
+            console.error('Error ejecutando la consulta:', err);
+            res.status(500).send('Error en el servidor');
+            return;
+        }
+
+        res.json(results);
+    });
+});
+
 app.post('/revisiones', async (req, res) => {
     const { matricula, cambio_filtro, cambio_aceite, cambio_frenos, costo_revision, fecha_hora_recepcion, fecha_hora_entrega } = req.body;
     try {
@@ -150,7 +179,34 @@ app.post('/revisiones', async (req, res) => {
     }
 });
 
+app.get('/mantenimientos/:matricula', (req, res) => {
+    const { matricula } = req.params;
 
+    const query = `
+      SELECT 
+        r.codigo_revision, 
+        r.matricula, 
+        r.cambio_filtro, 
+        r.cambio_aceite, 
+        r.cambio_frenos, 
+        r.costo_revision, 
+        r.fecha_hora_recepcion, 
+        r.fecha_hora_entrega
+      FROM revision r
+      WHERE r.matricula = ?
+      ORDER BY r.fecha_hora_recepcion DESC
+    `;
+
+    db.query(query, [matricula], (err, results) => {
+        if (err) {
+            console.error('Error ejecutando la consulta:', err);
+            res.status(500).send('Error en el servidor');
+            return;
+        }
+
+        res.json(results);
+    });
+});
 
 app.listen(port, () => {
     console.log(`Servidor escuchando en http://localhost:${port}`);
