@@ -97,35 +97,6 @@ app.get('/coches/:matricula', async (req, res) => {
     }
 });
 
-app.put('/coches/:matricula', async (req, res) => {
-    const { matricula } = req.params;
-    const { marca, modelo, color, precio_venta } = req.body;
-    try {
-        const [result] = await db.query('UPDATE Coche SET marca = ?, modelo = ?, color = ?, precio_venta = ? WHERE matricula = ?', [marca, modelo, color, precio_venta, matricula]);
-        if (result.affectedRows === 0) {
-            res.status(404).json({ error: 'Coche no encontrado' });
-        } else {
-            res.status(200).json({ message: 'Coche actualizado' });
-        }
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-app.delete('/coches/:matricula', async (req, res) => {
-    const { matricula } = req.params;
-    try {
-        const [result] = await db.query('DELETE FROM Coche WHERE matricula = ?', [matricula]);
-        if (result.affectedRows === 0) {
-            res.status(404).json({ error: 'Coche no encontrado' });
-        } else {
-            res.status(200).json({ message: 'Coche eliminado' });
-        }
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
 
 app.post('/clientes', async (req, res) => {
     const { numero_cedula, nombres, apellidos, direccion, ciudad, numero_telefono, matricula, fecha_compra } = req.body;
@@ -165,7 +136,6 @@ app.post('/clientes', async (req, res) => {
 });
 
 
-
 app.get('/clientes', async (req, res) => {
     try {
         const [rows] = await db.query('SELECT * FROM Cliente');
@@ -189,92 +159,21 @@ app.get('/clientes/:cedula', async (req, res) => {
     }
 });
 
-app.put('/clientes/:codigo_cliente', async (req, res) => {
-    const { codigo_cliente } = req.params;
-    const { numero_cedula, nombres, apellidos, direccion, ciudad, numero_telefono } = req.body;
+app.get('/cochescomprados/:numero_cedula', async (req, res) => {
+    const { numero_cedula } = req.params;
+
+    const query = `
+      SELECT coche.matricula, coche.marca, coche.modelo, coche.color
+      FROM cliente
+      JOIN compra ON cliente.codigo_cliente = compra.codigo_cliente
+      JOIN coche ON compra.matricula = coche.matricula
+      WHERE cliente.numero_cedula = ?`;
     try {
-        const [result] = await db.query('UPDATE Cliente SET numero_cedula = ?, nombres = ?, apellidos = ?, direccion = ?, ciudad = ?, numero_telefono = ? WHERE codigo_cliente = ?', [numero_cedula, nombres, apellidos, direccion, ciudad, numero_telefono, codigo_cliente]);
-        if (result.affectedRows === 0) {
-            res.status(404).json({ error: 'Cliente no encontrado' });
+        const [rows] = await db.query(query, [numero_cedula]);
+        if (rows) {
+            res.status(200).json(rows);
         } else {
-            res.status(200).json({ message: 'Cliente actualizado' });
-        }
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-app.delete('/clientes/:codigo_cliente', async (req, res) => {
-    const { codigo_cliente } = req.params;
-    try {
-        const [result] = await db.query('DELETE FROM Cliente WHERE codigo_cliente = ?', [codigo_cliente]);
-        if (result.affectedRows === 0) {
-            res.status(404).json({ error: 'Cliente no encontrado' });
-        } else {
-            res.status(200).json({ message: 'Cliente eliminado' });
-        }
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// Endpoints para la tabla Compra
-app.post('/compras', async (req, res) => {
-    const { matricula, codigo_cliente, fecha_compra } = req.body;
-    try {
-        const [result] = await db.query('INSERT INTO Compra (matricula, codigo_cliente, fecha_compra) VALUES (?, ?, ?)', [matricula, codigo_cliente, fecha_compra]);
-        res.status(201).json({ id: result.insertId });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-app.get('/compras', async (req, res) => {
-    try {
-        const [rows] = await db.query('SELECT * FROM Compra');
-        res.status(200).json(rows);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-app.get('/compras/:codigo_compra', async (req, res) => {
-    const { codigo_compra } = req.params;
-    try {
-        const [rows] = await db.query('SELECT * FROM Compra WHERE codigo_compra = ?', [codigo_compra]);
-        if (rows.length === 0) {
-            res.status(404).json({ error: 'Compra no encontrada' });
-        } else {
-            res.status(200).json(rows[0]);
-        }
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-app.put('/compras/:codigo_compra', async (req, res) => {
-    const { codigo_compra } = req.params;
-    const { matricula, codigo_cliente, fecha_compra } = req.body;
-    try {
-        const [result] = await db.query('UPDATE Compra SET matricula = ?, codigo_cliente = ?, fecha_compra = ? WHERE codigo_compra = ?', [matricula, codigo_cliente, fecha_compra, codigo_compra]);
-        if (result.affectedRows === 0) {
-            res.status(404).json({ error: 'Compra no encontrada' });
-        } else {
-            res.status(200).json({ message: 'Compra actualizada' });
-        }
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-app.delete('/compras/:codigo_compra', async (req, res) => {
-    const { codigo_compra } = req.params;
-    try {
-        const [result] = await db.query('DELETE FROM Compra WHERE codigo_compra = ?', [codigo_compra]);
-        if (result.affectedRows === 0) {
-            res.status(404).json({ error: 'Compra no encontrada' });
-        } else {
-            res.status(200).json({ message: 'Compra eliminada' });
+            res.status(404).json({ error: 'El Cliente no Tiene Vehículos' });
         }
     } catch (err) {
         res.status(500).json({ error: err.message });
